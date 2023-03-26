@@ -25,18 +25,36 @@ export default function Appointment(props) {
     back();
   };
 
+  async function save(name, interviewer) {
+    const interview = {
+      student: name,
+      interviewer
+    };
+    await props.bookInterview(props.id, interview);
+    transition(SHOW);
+  }
+  
+  
+  
+  
+
   return (
     <article className="appointment">
       <Header time={time} />
       {mode === EMPTY && <Empty onAdd={onAdd} />}
-      {mode === SHOW && (
+      {mode === SHOW && interview && (
         <Show
           student={interview.student}
           interviewer={interview.interviewer}
         />
       )}
       {mode === CREATE && (
-        <Form interviewers={[]} onCancel={onCancel} />
+        <Form
+          interviewers={props.interviewers}
+          onCancel={onCancel}
+          onSave={save}
+          bookInterview={props.bookInterview}
+        />
       )}
     </article>
   );
