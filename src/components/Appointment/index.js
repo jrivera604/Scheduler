@@ -4,11 +4,13 @@ import Header from "components/Appointment/Header";
 import Show from "components/Appointment/Show";
 import Empty from "components/Appointment/Empty";
 import Form from "components/Appointment/Form";
+import Status from "components/Appointment/Status";
 import useVisualMode from "hooks/useVisualMode";
 
 const EMPTY = "EMPTY";
 const SHOW = "SHOW";
 const CREATE = "CREATE";
+const SAVING = "SAVING"; 
 
 export default function Appointment(props) {
   const { time, interview } = props;
@@ -30,13 +32,10 @@ export default function Appointment(props) {
       student: name,
       interviewer
     };
+    transition(SAVING); 
     await props.bookInterview(props.id, interview);
     transition(SHOW);
   }
-  
-  
-  
-  
 
   return (
     <article className="appointment">
@@ -56,6 +55,7 @@ export default function Appointment(props) {
           bookInterview={props.bookInterview}
         />
       )}
+      {mode === SAVING && <Status message="Saving" />}
     </article>
   );
 }
