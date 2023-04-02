@@ -3,7 +3,7 @@ import classNames from 'classnames/bind';
 import 'components/DayListItem.scss';
 
 export default function DayListItem(props) {
-  const { name, spots, selected, onChange, value } = props;
+  const { name, spots, selected, onChange } = props;
 
   const formatSpots = (spots) => {
     if (!spots) {
@@ -21,7 +21,11 @@ export default function DayListItem(props) {
   });
 
   return (
-    <li className={dayClass} onClick={() => onChange(value)}>
+    <li
+      className={dayClass}
+      onClick={onChange}
+      data-testid="day"
+    >
       <h2 className="text--regular">{name}</h2>
       <h3 className="text--light">{formatSpots(spots)}</h3>
     </li>
