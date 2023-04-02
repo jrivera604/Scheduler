@@ -6,8 +6,6 @@ The Scheduler App is a web application that allows users to schedule appointment
 
 <img width="1136" alt="image" src="https://user-images.githubusercontent.com/112909357/229339487-3636fe34-ca68-4bb1-ac43-e563b89c4112.png">
 
-<img width="1136" alt="image" src="https://user-images.githubusercontent.com/112909357/229339561-788340b1-67b8-44f6-8585-8043494bb695.png">
-
 ![image](https://user-images.githubusercontent.com/112909357/229339840-d672be38-ef9f-4265-8f8c-c068e2f989f4.png)
 
 
