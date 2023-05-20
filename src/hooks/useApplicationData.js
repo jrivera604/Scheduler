@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from 'axios';
 
 export default function useApplicationData() {
   const [state, setState] = useState({
@@ -11,23 +10,31 @@ export default function useApplicationData() {
 
   useEffect(() => {
     Promise.all([
-      axios.get('/api/days'),
-      axios.get('/api/appointments'),
-      axios.get('/api/interviewers')
-    ]).then(all => {
-      const [daysResponse, appointmentsResponse, interviewersResponse] = all;
-      setState(prev => ({
-        ...prev,
-        days: daysResponse.data,
-        appointments: appointmentsResponse.data,
-        interviewers: interviewersResponse.data
-      }));
-    }).catch(error => {
-      console.log(error);
-    });
+      fetch('/api/days'),
+      fetch('/api/appointments'),
+      fetch('/api/interviewers')
+    ])
+      .then(([daysResponse, appointmentsResponse, interviewersResponse]) =>
+        Promise.all([
+          daysResponse.json(),
+          appointmentsResponse.json(),
+          interviewersResponse.json()
+        ])
+      )
+      .then(([daysData, appointmentsData, interviewersData]) => {
+        setState((prev) => ({
+          ...prev,
+          days: daysData,
+          appointments: appointmentsData,
+          interviewers: interviewersData
+        }));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }, []);
 
-  const setDay = day => setState(prev => ({ ...prev, day }));
+  const setDay = (day) => setState((prev) => ({ ...prev, day }));
 
   function bookInterview(id, interview) {
     const appointment = {
@@ -38,26 +45,32 @@ export default function useApplicationData() {
       ...state.appointments,
       [id]: appointment
     };
-    const days = state.days.map(day => {
+    const days = state.days.map((day) => {
       if (day.name === state.day) {
         return {
           ...day,
           spots: day.spots - 1
-        }
+        };
       }
       return day;
     });
-  
-    return axios.put(`/api/appointments/${id}`, { interview })
+
+    return fetch(`/api/appointments/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ interview })
+    })
       .then(() => {
-        setState({
-          ...state,
+        setState((prev) => ({
+          ...prev,
           appointments,
           days
-        });
+        }));
       });
   }
-  
+
   function cancelInterview(id) {
     const appointment = {
       ...state.appointments[id],
@@ -67,23 +80,25 @@ export default function useApplicationData() {
       ...state.appointments,
       [id]: appointment
     };
-    const days = state.days.map(day => {
+    const days = state.days.map((day) => {
       if (day.name === state.day) {
         return {
           ...day,
           spots: day.spots + 1
-        }
+        };
       }
       return day;
     });
-  
-    return axios.delete(`/api/appointments/${id}`)
+
+    return fetch(`/api/appointments/${id}`, {
+      method: 'DELETE'
+    })
       .then(() => {
-        setState({
-          ...state,
+        setState((prev) => ({
+          ...prev,
           appointments,
           days
-        });
+        }));
       });
   }
 
