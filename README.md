@@ -25,6 +25,12 @@ The Scheduler App is a web application that allows users to schedule appointment
   ```sh
 npm install
 ```
+3. Make sure to also grab the scheduler-api repo
+https://github.com/lighthouse-labs/scheduler-api
+
+and run it together with the scheduler app
+
+Follow the ReadMe 
 
 ## Running Webpack Development Server
 
