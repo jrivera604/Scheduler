@@ -63,8 +63,6 @@ export default function Application(props) {
         />
         <InterviewerList
           interviewers={interviewerList}
-          value={null}
-          onChange={() => {}}
         />
       </section>
       <section className="schedule">
