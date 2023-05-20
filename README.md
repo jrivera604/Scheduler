@@ -16,7 +16,7 @@ The Scheduler App is a web application that allows users to schedule appointment
 - Allow users to delete appointments.
 - Automatically update the number of spots remaining for each day.
 - Display error messages when appointments cannot be saved or deleted.
-- Support multiple users and allow them to switch between them.
+
 
 ## Setup
 
