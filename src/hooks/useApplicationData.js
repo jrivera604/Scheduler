@@ -9,6 +9,7 @@ export default function useApplicationData() {
   });
 
   useEffect(() => {
+    // Fetch data from the API endpoints
     Promise.all([
       fetch('/api/days'),
       fetch('/api/appointments'),
@@ -16,12 +17,13 @@ export default function useApplicationData() {
     ])
       .then(([daysResponse, appointmentsResponse, interviewersResponse]) =>
         Promise.all([
-          daysResponse.json(),
-          appointmentsResponse.json(),
+          daysResponse.json(), 
+          appointmentsResponse.json(), 
           interviewersResponse.json()
         ])
       )
       .then(([daysData, appointmentsData, interviewersData]) => {
+        // Update the state with the fetched data
         setState((prev) => ({
           ...prev,
           days: daysData,
@@ -90,10 +92,12 @@ export default function useApplicationData() {
       return day;
     });
 
+    // Send a DELETE request to the API to cancel the appointment
     return fetch(`/api/appointments/${id}`, {
       method: 'DELETE'
     })
       .then(() => {
+        // Update the state with the updated appointments and days data
         setState((prev) => ({
           ...prev,
           appointments,
