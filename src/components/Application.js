@@ -61,9 +61,7 @@ export default function Application(props) {
           src="images/lhl.png"
           alt="Lighthouse Labs"
         />
-        <InterviewerList
-          interviewers={interviewerList}
-        />
+        
       </section>
       <section className="schedule">
         {schedule}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from 'axios';
 
 export default function useApplicationData() {
   const [state, setState] = useState({
@@ -11,24 +12,17 @@ export default function useApplicationData() {
   useEffect(() => {
     // Fetch data from the API endpoints
     Promise.all([
-      fetch('/api/days'),
-      fetch('/api/appointments'),
-      fetch('/api/interviewers')
+      axios.get('/api/days'),
+      axios.get('/api/appointments'),
+      axios.get('/api/interviewers')
     ])
-      .then(([daysResponse, appointmentsResponse, interviewersResponse]) =>
-        Promise.all([
-          daysResponse.json(), 
-          appointmentsResponse.json(), 
-          interviewersResponse.json()
-        ])
-      )
       .then(([daysData, appointmentsData, interviewersData]) => {
         // Update the state with the fetched data
         setState((prev) => ({
           ...prev,
-          days: daysData,
-          appointments: appointmentsData,
-          interviewers: interviewersData
+          days: daysData.data,
+          appointments: appointmentsData.data,
+          interviewers: interviewersData.data
         }));
       })
       .catch((error) => {
@@ -38,7 +32,7 @@ export default function useApplicationData() {
 
   const setDay = (day) => setState((prev) => ({ ...prev, day }));
 
-  function bookInterview(id, interview) {
+  function bookInterview(id, interview, isNewAppointment) {
     const appointment = {
       ...state.appointments[id],
       interview: { ...interview }
@@ -47,28 +41,33 @@ export default function useApplicationData() {
       ...state.appointments,
       [id]: appointment
     };
-    const days = state.days.map((day) => {
-      if (day.name === state.day) {
-        return {
-          ...day,
-          spots: day.spots - 1
-        };
-      }
-      return day;
-    });
 
-    return fetch(`/api/appointments/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ interview })
-    })
+    if (isNewAppointment) {
+      // Update the spots count only for new appointments
+      const updatedDays = updateDays(state.days, state.day, -1);
+      setState((prev) => ({
+        ...prev,
+        appointments,
+        days: updatedDays
+      }));
+    } else {
+      // Update the appointment without changing the spots count
+      setState((prev) => ({
+        ...prev,
+        appointments
+      }));
+    }
+
+    return axios.put(`/api/appointments/${id}`, { interview })
       .then(() => {
+        // Fetch the updated days data from the server
+        return axios.get('/api/days');
+      })
+      .then((daysData) => {
+        // Update the days data with the fetched data
         setState((prev) => ({
           ...prev,
-          appointments,
-          days
+          days: daysData.data
         }));
       });
   }
@@ -82,28 +81,29 @@ export default function useApplicationData() {
       ...state.appointments,
       [id]: appointment
     };
-    const days = state.days.map((day) => {
-      if (day.name === state.day) {
+
+    // Update the spots count for canceled appointments
+    const updatedDays = updateDays(state.days, state.day, 1);
+    setState((prev) => ({
+      ...prev,
+      appointments,
+      days: updatedDays
+    }));
+
+    return axios.delete(`/api/appointments/${id}`);
+  }
+
+  // Utility function to update the spots for a specific day
+  function updateDays(days, selectedDay, change) {
+    return days.map((day) => {
+      if (day.name === selectedDay) {
         return {
           ...day,
-          spots: day.spots + 1
+          spots: day.spots + change
         };
       }
       return day;
     });
-
-    // Send a DELETE request to the API to cancel the appointment
-    return fetch(`/api/appointments/${id}`, {
-      method: 'DELETE'
-    })
-      .then(() => {
-        // Update the state with the updated appointments and days data
-        setState((prev) => ({
-          ...prev,
-          appointments,
-          days
-        }));
-      });
   }
 
   return { state, setDay, bookInterview, cancelInterview };

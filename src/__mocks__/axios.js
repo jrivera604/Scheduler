@@ -121,6 +121,7 @@ export default {
   }),
 
   delete: jest.fn(url => {
+    console.log("delete")
     return Promise.resolve({
       status: 204,
       statusText: "No Content"
@@ -129,6 +130,3 @@ export default {
 };
 
 
-it("shows the save error when failing to save an appointment", () => {
-  axios.put.mockRejectedValueOnce();
-});
