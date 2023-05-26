@@ -42,21 +42,12 @@ export default function useApplicationData() {
       [id]: appointment
     };
 
-    if (isNewAppointment) {
-      // Update the spots count only for new appointments
-      const updatedDays = updateDays(state.days, state.day, -1);
-      setState((prev) => ({
-        ...prev,
-        appointments,
-        days: updatedDays
-      }));
-    } else {
-      // Update the appointment without changing the spots count
-      setState((prev) => ({
-        ...prev,
-        appointments
-      }));
-    }
+    const updatedDays = updateDays(state.days, state.day, isNewAppointment ? -1 : 0);
+    setState((prev) => ({
+      ...prev,
+      appointments,
+      days: updatedDays
+    }));
 
     return axios.put(`/api/appointments/${id}`, { interview })
       .then(() => {
@@ -69,6 +60,24 @@ export default function useApplicationData() {
           ...prev,
           days: daysData.data
         }));
+      })
+      .catch((error) => {
+        console.log(error);
+        // Revert the state changes if the request fails
+        const appointment = {
+          ...state.appointments[id],
+          interview: null
+        };
+        const appointments = {
+          ...state.appointments,
+          [id]: appointment
+        };
+        setState((prev) => ({
+          ...prev,
+          appointments,
+          days: state.days
+        }));
+        throw error;
       });
   }
 
@@ -82,15 +91,19 @@ export default function useApplicationData() {
       [id]: appointment
     };
 
-    // Update the spots count for canceled appointments
-    const updatedDays = updateDays(state.days, state.day, 1);
-    setState((prev) => ({
-      ...prev,
-      appointments,
-      days: updatedDays
-    }));
-
-    return axios.delete(`/api/appointments/${id}`);
+    return axios.delete(`/api/appointments/${id}`)
+      .then(() => {
+        const updatedDays = updateDays(state.days, state.day, 1);
+        setState((prev) => ({
+          ...prev,
+          appointments,
+          days: updatedDays
+        }));
+      })
+      .catch((error) => {
+        console.log(error);
+        throw error;
+      });
   }
 
   // Utility function to update the spots for a specific day
