@@ -41,15 +41,19 @@ export default function useApplicationData() {
       ...state.appointments,
       [id]: appointment
     };
-
+  
     const updatedDays = updateDays(state.days, state.day, isNewAppointment ? -1 : 0);
     setState((prev) => ({
       ...prev,
       appointments,
       days: updatedDays
     }));
-
-    return axios.put(`/api/appointments/${id}`, { interview })
+  
+    const request = isNewAppointment
+      ? axios.post(`/api/appointments`, { interview })
+      : axios.put(`/api/appointments/${id}`, { interview });
+  
+    return request
       .then(() => {
         // Fetch the updated days data from the server
         return axios.get('/api/days');
@@ -64,14 +68,6 @@ export default function useApplicationData() {
       .catch((error) => {
         console.log(error);
         // Revert the state changes if the request fails
-        const appointment = {
-          ...state.appointments[id],
-          interview: null
-        };
-        const appointments = {
-          ...state.appointments,
-          [id]: appointment
-        };
         setState((prev) => ({
           ...prev,
           appointments,
@@ -80,6 +76,7 @@ export default function useApplicationData() {
         throw error;
       });
   }
+  
 
   function cancelInterview(id) {
     const appointment = {
